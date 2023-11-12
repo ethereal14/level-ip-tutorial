@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"C_Cpp.codeAnalysis.runAutomatically": false,
+		"C_Cpp.intelliSenseEngine": "disabled",
+		"C_Cpp.formatting": "disabled",
+		"C_Cpp.autoAddFileAssociations": false,
+		"C_Cpp.autocompleteAddParentheses": false,
+		"C_Cpp.autocomplete": "disabled",
+		"C_Cpp.errorSquiggles": "disabled",
+		"clangd.arguments": [
+			"--compile-commands-dir=.vscode",
+			"--header-insertion=never",
+			// "--"
+		]
+	}
+}
