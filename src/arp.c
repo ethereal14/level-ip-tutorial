@@ -10,9 +10,9 @@ static struct arp_cache_entry arp_cache[ARP_CACHE_LEN];
  * @param data
  * @return int
  */
-static int update_arp_translation_table(struct arp_hdr* hdr, struct arp_ipv4* data)
+static int update_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 {
-    struct arp_cache_entry* entry;
+    struct arp_cache_entry *entry;
     for (int i = 0; i < ARP_CACHE_LEN; i++) {
         entry = &arp_cache[i];
 
@@ -35,9 +35,9 @@ static int update_arp_translation_table(struct arp_hdr* hdr, struct arp_ipv4* da
  * @param data
  * @return int
  */
-static int insert_arp_translation_table(struct arp_hdr* hdr, struct arp_ipv4* data)
+static int insert_arp_translation_table(struct arp_hdr *hdr, struct arp_ipv4 *data)
 {
-    struct arp_cache_entry* entry;
+    struct arp_cache_entry *entry;
     for (int i = 0; i < ARP_CACHE_LEN; i++) {
         entry = &arp_cache[i];
 
@@ -45,7 +45,7 @@ static int insert_arp_translation_table(struct arp_hdr* hdr, struct arp_ipv4* da
             entry->state = ARP_RESOLVED;
 
             entry->hwtype = hdr->hwtype;
-            entry->sip    = data->sip;
+            entry->sip = data->sip;
             memcpy(entry->smac, data->smac, sizeof(entry->smac));
 
             return 0;
@@ -59,17 +59,17 @@ void arp_init()
     memset(arp_cache, 0, ARP_CACHE_LEN * sizeof(struct arp_cache_entry));
 }
 
-void arp_incoming(struct netdev* netdev, struct eth_hdr* hdr)
+void arp_incoming(struct netdev *netdev, struct eth_hdr *hdr)
 {
-    struct arp_hdr*  arphdr;
-    struct arp_ipv4* arpdata;
-    int              merge = 0;
+    struct arp_hdr *arphdr;
+    struct arp_ipv4 *arpdata;
+    int merge = 0;
 
-    arphdr = (struct arp_hdr*)hdr->payload;
+    arphdr = (struct arp_hdr *)hdr->payload;
 
-    arphdr->hwtype  = ntohs(arphdr->hwtype);
+    arphdr->hwtype = ntohs(arphdr->hwtype);
     arphdr->protype = ntohs(arphdr->protype);
-    arphdr->opcode  = ntohs(arphdr->opcode);
+    arphdr->opcode = ntohs(arphdr->opcode);
 
     if (arphdr->hwtype != ARP_ETHERNET) {
         printf("Unsupport HW type!\n");
@@ -81,12 +81,13 @@ void arp_incoming(struct netdev* netdev, struct eth_hdr* hdr)
         return;
     }
 
-    arpdata = (struct arp_ipv4*)arphdr->data;
+    arpdata = (struct arp_ipv4 *)arphdr->data;
 
     merge = update_arp_translation_table(arphdr, arpdata);
 
     if (netdev->addr != arpdata->dip) {
         printf("ARP was not for us!\n");
+        return;
     }
 
     if (!merge && insert_arp_translation_table(arphdr, arpdata) != 0) {
@@ -94,17 +95,20 @@ void arp_incoming(struct netdev* netdev, struct eth_hdr* hdr)
     }
 
     switch (arphdr->opcode) {
-    case ARP_REQUEST: arp_reply(netdev, hdr, arphdr); break;
-    default: printf("Opcode not supported\n");
+        case ARP_REQUEST:
+            arp_reply(netdev, hdr, arphdr);
+            break;
+        default:
+            printf("Opcode not supported\n");
     }
 }
 
-void arp_reply(struct netdev* netdev, struct eth_hdr* hdr, struct arp_hdr* arphdr)
+void arp_reply(struct netdev *netdev, struct eth_hdr *hdr, struct arp_hdr *arphdr)
 {
-    struct arp_ipv4* arpdata;
-    int              len;
+    struct arp_ipv4 *arpdata;
+    int len;
 
-    arpdata = (struct arp_ipv4*)arphdr->data;
+    arpdata = (struct arp_ipv4 *)arphdr->data;
 
     memcpy(arpdata->dmac, arpdata->smac, 6);
     arpdata->dip = arpdata->sip;
@@ -113,8 +117,8 @@ void arp_reply(struct netdev* netdev, struct eth_hdr* hdr, struct arp_hdr* arphd
 
     arphdr->opcode = ARP_REPLY;
 
-    arphdr->opcode  = htons(arphdr->opcode);
-    arphdr->hwtype  = htons(arphdr->hwtype);
+    arphdr->opcode = htons(arphdr->opcode);
+    arphdr->hwtype = htons(arphdr->hwtype);
     arphdr->protype = htons(arphdr->protype);
 
     len = sizeof(struct arp_hdr) + sizeof(struct arp_ipv4);

@@ -16,4 +16,4 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-#endif   // SYSHEAD_H
+#endif // SYSHEAD_H
